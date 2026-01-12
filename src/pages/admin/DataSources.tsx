@@ -27,7 +27,7 @@ import { Check, Edit, Globe, Trash, X } from 'lucide-react';
 const initialDataSources = [
   { id: 1, name: 'Reddit API', url: 'https://www.reddit.com/r/WallStreetBets/.json', type: 'Sentiment', active: true },
   { id: 2, name: 'Twitter API', url: 'https://api.twitter.com/sentiment', type: 'Sentiment', active: true },
-  { id: 3, name: 'Financial News API', url: 'https://api.financialnews.com/sentiment', type: 'Sentiment', active: false },
+  { id: 3, name: 'Financial News API', url: 'https://api.financialnews.com/sentiment', type: 'Sentiment', active: true },
   { id: 4, name: 'Stock Market API', url: 'https://api.stockmarket.com/prices', type: 'Market Data', active: true },
 ];
 

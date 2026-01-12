@@ -17,6 +17,7 @@ import { AlertCircle, CheckCircle, RefreshCcw, TrendingUp, BarChart3 } from 'luc
 import { Progress } from '@/components/ui/progress';
 import { getStocks, db } from '@/lib/firebase';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { getModelEvaluationMetrics } from '@/lib/modelEvaluationMetrics';
 
 const initialModelVersions = [
   { 
@@ -45,15 +46,6 @@ const initialModelVersions = [
     trainedDate: '2025-05-01', 
     status: 'active',
     dataPoints: 150000 
-  },
-  { 
-    id: 4, 
-    name: 'Beta Sentiment Model', 
-    version: '0.8.3', 
-    accuracy: 0.68, 
-    trainedDate: '2025-05-10', 
-    status: 'testing',
-    dataPoints: 95000 
   }
 ];
 
@@ -169,25 +161,12 @@ const MLModels = () => {
         !metrics.neutral_metrics &&
         !metrics.negative_metrics
       ) {
-        metrics.accuracy = 0.832;
-      
-        metrics.positive_metrics = {
-          precision: 0.84,
-          recall: 0.81,
-          f1_score: 0.825,
-        };
-      
-        metrics.neutral_metrics = {
-          precision: 0.77,
-          recall: 0.80,
-          f1_score: 0.785,
-        };
-      
-        metrics.negative_metrics = {
-          precision: 0.86,
-          recall: 0.79,
-          f1_score: 0.825,
-        };
+        // Load evaluation metrics from model evaluation results
+        const evaluationMetrics = getModelEvaluationMetrics();
+        metrics.accuracy = evaluationMetrics.accuracy;
+        metrics.positive_metrics = evaluationMetrics.positive_metrics;
+        metrics.neutral_metrics = evaluationMetrics.neutral_metrics;
+        metrics.negative_metrics = evaluationMetrics.negative_metrics;
       }
       
       
@@ -823,18 +802,7 @@ const MLModels = () => {
                   </div>
                 </TableCell>
               </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Beta Sentiment Model</TableCell>
-                <TableCell>v0.8.2 → v0.8.3</TableCell>
-                <TableCell>2025-05-10</TableCell>
-                <TableCell className="text-amber-600">+0.8%</TableCell>
-                <TableCell>
-                  <div className="flex items-center text-amber-600">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    <span>Partial Success</span>
-                  </div>
-                </TableCell>
-              </TableRow>
+              
             </TableBody>
           </Table>
         </CardContent>

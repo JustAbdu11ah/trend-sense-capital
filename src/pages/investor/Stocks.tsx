@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableCell, TableBody } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Search, TrendingUp, Loader2 } from 'lucide-react';
 import { getFirestore, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
 
 interface Stock {
   id: string;
@@ -60,6 +70,20 @@ const Stocks = () => {
     return () => unsubscribe();
   }, [toast]);
 
+  // Get top 10 performers by change percentage
+  const topPerformers = useMemo(() => {
+    return stocks
+      .filter(stock => stock.change !== undefined && !isNaN(stock.change))
+      .sort((a, b) => b.change - a.change)
+      .slice(0, 10)
+      .map(stock => ({
+        ticker: stock.ticker,
+        name: stock.name,
+        change: stock.change,
+        price: stock.currentPrice,
+      }));
+  }, [stocks]);
+
   const filteredStocks = stocks.filter(stock => 
     stock.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     stock.ticker.toLowerCase().includes(searchTerm.toLowerCase())
@@ -101,22 +125,81 @@ const Stocks = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">S&P 500 Stocks</h1>
+        <h1 className="text-3xl font-bold">Top Stocks</h1>
         <p className="text-muted-foreground mt-1">Browse and add stocks to your portfolio</p>
       </div>
       
       {/* Top Performers Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>S&P 500 Top Performers</CardTitle>
+          <CardTitle>Top Performers</CardTitle>
           <CardDescription>Latest market trends for top-performing stocks</CardDescription>
         </CardHeader>
-        <CardContent className="h-[300px] flex items-center justify-center">
-          <div className="text-center text-muted-foreground">
-            <TrendingUp className="h-10 w-10 mx-auto mb-2" />
-            <p>Interactive chart visualization would appear here</p>
-            <p className="text-sm">Showing real-time performance data for top S&P 500 stocks</p>
-          </div>
+        <CardContent>
+          {topPerformers.length > 0 ? (
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={topPerformers}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis
+                    dataKey="ticker"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`}
+                  />
+                  <Tooltip 
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
+                            <p className="font-semibold">{data.name}</p>
+                            <p className="text-sm text-muted-foreground">{data.ticker}</p>
+                            <p className="text-sm">
+                              Change: <span className={data.change >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                              </span>
+                            </p>
+                            <p className="text-sm">Price: ${data.price.toFixed(2)}</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar dataKey="change" radius={[8, 8, 0, 0]}>
+                    {topPerformers.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.change >= 0 ? '#10B981' : '#EF4444'}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+              <div className="text-center">
+                <TrendingUp className="h-10 w-10 mx-auto mb-2" />
+                <p>No stock data available</p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
       
