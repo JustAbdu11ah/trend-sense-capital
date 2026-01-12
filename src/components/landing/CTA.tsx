@@ -35,9 +35,7 @@ const CTA = () => {
               </Button>
             </Link>
           </div>
-          <p className="mt-6 text-sm opacity-80">
-            No credit card required. 14-day free trial.
-          </p>
+          
         </div>
       </div>
     </section>

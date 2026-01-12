@@ -62,12 +62,7 @@ const Navbar = () => {
           >
             Features
           </button>
-          <button 
-            onClick={() => handleSectionScroll('pricing')} 
-            className="text-foreground/80 hover:text-primary transition"
-          >
-            Pricing
-          </button>
+          
           <button 
             onClick={() => handleSectionScroll('how-it-works')} 
             className="text-foreground/80 hover:text-primary transition"
@@ -126,12 +121,7 @@ const Navbar = () => {
             >
               Features
             </button>
-            <button 
-              onClick={() => handleSectionScroll('pricing')} 
-              className="text-lg font-medium"
-            >
-              Pricing
-            </button>
+            
             <button 
               onClick={() => handleSectionScroll('how-it-works')} 
               className="text-lg font-medium"
